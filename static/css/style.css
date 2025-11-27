@@ -1,0 +1,129 @@
+/* =========================================
+   ESTILOS PRINCIPALES (DISEÑO PRO)
+   ========================================= */
+body {
+    background-color: #0f172a; /* Azul oscuro base */
+    /* DEGRADADO DE FONDO (EL QUE TE GUSTABA) */
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    background-attachment: fixed; /* Para que el fondo no se mueva al hacer scroll */
+    background-size: cover;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- EFECTO VIDRIO (GLASSMORPHISM) --- */
+/* Se aplica a todas las tarjetas, incluyendo las nuevas */
+.glass-card {
+    background: rgba(30, 41, 59, 0.6); /* Un poco más transparente */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); /* Sombra más fuerte */
+    cursor: pointer;
+    background: rgba(30, 41, 59, 0.8);
+}
+
+/* Navbar Glass */
+.navbar-glass {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* --- BARRA DE BÚSQUEDA --- */
+.search-container {
+    position: relative;
+    min-width: 250px;
+}
+.glass-input {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: white;
+    border-radius: 20px;
+    padding: 8px 15px 8px 40px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+.glass-input:focus {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: #38bdf8;
+    outline: none;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+}
+.search-icon {
+    position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.5); pointer-events: none;
+}
+.glass-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+/* --- ANIMACIONES DE LATIDO (LAS BOLITAS) --- */
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    box-shadow: 0 0 10px currentColor;
+}
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+.status-online { background-color: #10b981; color: #10b981; animation: pulse-green 2s infinite; }
+.status-warning { background-color: #f59e0b; color: #f59e0b; }
+.status-offline { background-color: #ef4444; color: #ef4444; animation: pulse-red 1.5s infinite; }
+
+/* --- UPTIME BADGE --- */
+.uptime-badge {
+    font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.uptime-high { color: #10b981; }
+.uptime-med { color: #f59e0b; }
+.uptime-low { color: #ef4444; }
+
+/* --- CONSOLA TIPO WIRESHARK --- */
+.console-container {
+    background-color: #050505; border: 1px solid #333; border-radius: 8px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 0.85rem;
+    height: 250px; overflow-y: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); padding: 10px;
+}
+.console-container::-webkit-scrollbar { width: 8px; }
+.console-container::-webkit-scrollbar-track { background: #111; }
+.console-container::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+.log-entry { border-bottom: 1px solid #1a1a1a; padding: 3px 5px; display: flex; justify-content: space-between; align-items: center; }
+.log-entry:hover { background-color: #111; }
+.log-success { color: #86efac; }
+.log-error { background-color: rgba(69, 10, 10, 0.5); color: #fca5a5; }
+.log-warning { color: #fde047; }
+.log-timestamp { color: #64748b; margin-right: 15px; font-size: 0.8em; }
+.log-protocol { color: #38bdf8; font-weight: bold; margin-right: 10px; min-width: 40px; display: inline-block;}
+
+/* Utilidades */
+.text-uppercase { text-transform: uppercase; letter-spacing: 1px; }
+
+/* Modal */
+.modal-content { background-color: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: white; }
+.modal-header { border-bottom: 1px solid rgba(255,255,255,0.1); }

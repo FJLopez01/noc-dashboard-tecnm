@@ -1,0 +1,6 @@
+# IP, NOMBRE, PUERTOS (Separados por espacio o vacio si no quieres)
+8.8.8.8, Google DNS, 53
+1.1.1.1, Cloudflare DNS, 53
+192.168.1.254, Gateway Principal, 80 443
+192.168.1.180, Mi PC Local, 80 3306 5000
+# Nota: El 5000 es tu propio dashboard flask ;
