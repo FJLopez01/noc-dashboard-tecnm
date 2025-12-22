@@ -3,7 +3,8 @@ import csv
 import io
 import os
 from flask import Flask, jsonify, render_template, Response
-
+from monitor import main as monitor_main
+import threading
 # Importamos el módulo de tráfico (Asegúrate de tener traffic_analyzer.py creado)
 from traffic_analyzer import start_sniffer_thread, get_traffic_stats
 
@@ -32,7 +33,6 @@ def get_active_ips():
         with open(CONFIG_FILE, 'r') as f:
             for line in f:
                 limpio = line.replace("(", "").replace(")", "").replace("'", "")
-                # 2. Dividimos por la coma y tomamos el primer elemento
                 ip = limpio.split(",")[0].strip()
                 active_ips.append(ip)
     except Exception as e:
@@ -94,5 +94,7 @@ def export_csv():
     return Response(output.getvalue(), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=reporte_red_tecnm.csv"})
 
 if __name__ == '__main__':
-    
+    hilo = threading.Thread(target=monitor_main)
+    hilo.daemon = True 
+    hilo.start()
     app.run(debug=True)
