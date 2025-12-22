@@ -31,10 +31,10 @@ def get_active_ips():
     try:
         with open(CONFIG_FILE, 'r') as f:
             for line in f:
-                if line.strip() and not line.startswith('#'):
-                    parts = line.strip().split(',')
-                    ip = parts[0].strip()
-                    active_ips.append(ip)
+                limpio = line.replace("(", "").replace(")", "").replace("'", "")
+                # 2. Dividimos por la coma y tomamos el primer elemento
+                ip = limpio.split(",")[0].strip()
+                active_ips.append(ip)
     except Exception as e:
         print(f"Error config: {e}")
     return active_ips
@@ -94,4 +94,5 @@ def export_csv():
     return Response(output.getvalue(), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=reporte_red_tecnm.csv"})
 
 if __name__ == '__main__':
+    
     app.run(debug=True)

@@ -3,6 +3,7 @@ import time
 import os
 from database import save_ping_result, init_db
 from net_tools import scan_services  # <--- MODULARIDAD
+from test_socket import escanear_red
 
 if not os.path.exists("network_monitor.db"):
     init_db()
@@ -17,31 +18,10 @@ def check_host(ip):
     except:
         return "error", None
 
-def get_targets():
-    targets = []
-    if not os.path.exists("ips.txt"): return []
-
-    with open("ips.txt", 'r') as f:
-        for line in f:
-            if line.strip() and not line.startswith('#'):
-                parts = line.strip().split(',')
-                ip = parts[0].strip()
-                name = parts[1].strip() if len(parts) > 1 else ip
-                
-                # Obtener puertos si existen (tercera columna)
-                ports = []
-                if len(parts) > 2:
-                    # Separamos por espacio "80 443" -> [80, 443]
-                    raw_ports = parts[2].strip().split()
-                    ports = [p for p in raw_ports if p.isdigit()]
-
-                targets.append({'ip': ip, 'name': name, 'ports': ports})
-    return targets
-
 if __name__ == "__main__":
     print("--- MONITOR DE SERVICIOS INICIADO ---")
     while True:
-        target_list = get_targets()
+        target_list = escanear_red()
         
         for target in target_list:
             ip = target['ip']

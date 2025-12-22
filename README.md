@@ -124,8 +124,7 @@ Abra su navegador web y visite:
 http://127.0.0.1:5000
 
 
-Licencia y Créditos
-Proyecto desarrollado para la titulación de Ingeniería en Sistemas Computacionales. 
+
 
 
 
