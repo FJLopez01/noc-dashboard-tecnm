@@ -1,9 +1,7 @@
 import subprocess
 import platform
 import socket
-import re
 from concurrent.futures import ThreadPoolExecutor
-import nmap # pip install python-nmap
 
 def get_hostname(ip):
     try:
@@ -21,9 +19,9 @@ def scan_device(ip):
         return {"ip": ip, "name": hostname, "ports": None}
     return None
 
-def escanear_red():
-    base_ip = "192.168.0."
-    
+def escanear_red(segmento):
+
+    base_ip = segmento + "."
     ips = [base_ip + str(i) for i in range(1, 256)]
     
     with ThreadPoolExecutor(max_workers=50) as executor:

@@ -4,9 +4,17 @@ import os
 from database import save_ping_result, init_db
 from net_tools import scan_services  # <--- MODULARIDAD
 from test_socket import escanear_red
+import re
 
 if not os.path.exists("network_monitor.db"):
     init_db()
+
+def limpiar_pantalla():
+    # 'nt' es para Windows, 'posix' para Linux y macOS
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')
 
 def check_host(ip):
     try:
@@ -18,10 +26,18 @@ def check_host(ip):
     except:
         return "error", None
 
-if __name__ == "__main__":
+def main():
     print("--- MONITOR DE SERVICIOS INICIADO ---")
+    res = 'n'
     while True:
-        target_list = escanear_red()
+        while res.lower() == 'n':
+            segmento = input("Introduzca el segmento de red a escanear (ejemplo: 192.168.0)\n")
+            if not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}$', segmento):
+                print("Segmento de red inválido.")
+            else:
+                break
+
+        target_list = escanear_red(segmento)
         
         for target in target_list:
             ip = target['ip']
@@ -43,5 +59,14 @@ if __name__ == "__main__":
             
             print(f"{name} -> {status} | Servicios: {services_str}")
 
-        print("Esperando 10 segundos...")
-        time.sleep(10)
+        res = input("¿Continuar escaneando el mismo segmento? Y/N\n")
+        limpiar_pantalla()
+        if res.lower() == 'y':
+            print("Reiniciando escaneo del mismo segmento...")
+            time.sleep(5)
+        else:
+            res = 'n'
+            continue
+
+if __name__ == "__main__":
+    main()
