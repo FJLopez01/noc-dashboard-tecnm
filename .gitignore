@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Entornos virtuales
+venv/
+.env
+.env.*
+
+# Datos locales
+data/history.db
+data/exports/
+
+# IDEs
+.vscode/
+.idea/
