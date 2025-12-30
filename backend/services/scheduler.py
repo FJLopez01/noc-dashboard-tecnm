@@ -4,8 +4,8 @@ from datetime import datetime
 
 from backend.services.icmp_monitor import ping_host
 from backend.storage.database import get_connection
-from backend.config import HOSTS, PING_INTERVAL
-
+from backend.config import PING_INTERVAL
+from backend.services.network_discovery import scan_network
 
 def monitor_loop():
     """
@@ -15,6 +15,9 @@ def monitor_loop():
     print("[SCHEDULER] Monitor de red iniciado")
 
     while True:
+        
+        HOSTS = scan_network("192.168.0")
+
         for host in HOSTS:
             ip = host["ip"]
             name = host.get("name", ip)
