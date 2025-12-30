@@ -1,3 +1,5 @@
+// frontend\static\js\clock.js
+
 function startClock() {
     const clockElement = document.getElementById('live-clock');
     

@@ -381,6 +381,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+    // --- GESTIÓN DE SEGMENTOS ---
+async function saveSegment() {
+    const input = document.getElementById("segmentInput");
+    if (!input) return;
+
+    const segment = input.value.trim();
+    if (!segment) return;
+
+    const res = await fetch("/api/segments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ segment })
+    });
+
+    if (res.ok) {
+        input.value = "";
+        alert("Segmento añadido correctamente");
+    } else {
+        alert("Segmento inválido");
+    }
+}
+
+
 // Actualizar cada 3 segundos
 setInterval(update, 3000);
 update();

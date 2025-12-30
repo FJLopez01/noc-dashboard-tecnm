@@ -1,6 +1,3 @@
-PING_INTERVAL = 5  # segundos
+PING_INTERVAL = 5
+NETWORK_SEGMENTS = ["10.100.10.0/24", "10.100.11.0/24"]
 
-HOSTS = [
-    {"name": "Router", "ip": "192.168.1.1"},
-    {"name": "Servidor Web", "ip": "192.168.1.10"},
-]

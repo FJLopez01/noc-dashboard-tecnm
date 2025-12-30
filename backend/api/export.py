@@ -1,56 +1,50 @@
+# backend/api/export.py
+
 import csv
-import os
-from datetime import datetime
-from flask import Blueprint, send_file
+from io import StringIO
+from flask import Blueprint, Response
 
-from backend.services.uptime_calculator import calculate_uptime
-from backend.storage.database import get_connection
-from backend.config import HOSTS
+from backend.storage.memory_store import get_all_hosts
 
-export_bp = Blueprint("export", __name__)
+export_bp = Blueprint("export", __name__, url_prefix="/api")
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-EXPORT_DIR = os.path.join(BASE_DIR, "data", "exports")
 
-@export_bp.route("/api/export", methods=["GET"])
+@export_bp.route("/export", methods=["GET"])
 def export_csv():
-    os.makedirs(EXPORT_DIR, exist_ok=True)
+    hosts = get_all_hosts()
 
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    filename = f"noc_report_{timestamp}.csv"
-    filepath = os.path.join(EXPORT_DIR, filename)
+    output = StringIO()
+    writer = csv.writer(output)
 
-    with open(filepath, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
+    # Header profesional
+    writer.writerow([
+        "IP Address",
+        "Hostname",
+        "Status",
+        "Latency (ms)",
+        "Uptime (%)",
+        "Critical",
+        "Last Check"
+    ])
+
+    for h in hosts:
         writer.writerow([
-            "ip",
-            "status",
-            "avg_latency_ms",
-            "sla_percent",
-            "generated_at"
+            h.get("ip_address"),
+            h.get("host_name"),
+            h.get("status"),
+            h.get("latency_ms"),
+            h.get("uptime_percent"),
+            "YES" if h.get("critical") else "NO",
+            h.get("last_check") or h.get("timestamp")
         ])
 
-        for host in HOSTS:
-            ip = host["ip"]
-            sla = calculate_uptime(ip)
+    response = Response(
+        output.getvalue(),
+        mimetype="text/csv"
+    )
 
-            with get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT AVG(latency_ms)
-                    FROM latency_history
-                    WHERE ip = ?
-                """, (ip,))
-                avg_latency = cursor.fetchone()[0]
+    response.headers["Content-Disposition"] = (
+        "attachment; filename=noc_dashboard_export.csv"
+    )
 
-            status = "Online" if avg_latency is not None else "Offline"
-
-            writer.writerow([
-                ip,
-                status,
-                round(avg_latency, 2) if avg_latency else "",
-                sla,
-                timestamp
-            ])
-
-    return send_file(filepath, as_attachment=True)
+    return response

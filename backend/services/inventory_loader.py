@@ -1,26 +1,44 @@
-import json
-from pathlib import Path
+# backend/services/inventory_loader.py
 
-HOSTS_FILE = Path("data/hosts.json")
+from backend.services.network_discovery import discover_hosts
+from backend.config import NETWORK_SEGMENTS
+
+
+def load_static_hosts():
+    """
+    Hosts definidos manualmente (infra crítica)
+    """
+    return [
+        {
+            "ip": "10.100.10.1",
+            "name": "Gateway-10",
+            "services": [22, 80],
+            "critical": True,
+            "type": "gateway"
+        },
+        {
+            "ip": "10.100.11.1",
+            "name": "Gateway-11",
+            "services": [22, 80],
+            "critical": True,
+            "type": "gateway"
+        }
+    ]
+
 
 def load_hosts():
-    if not HOSTS_FILE.exists():
-        raise FileNotFoundError("hosts.json no encontrado")
+    """
+    Combina inventario estático + descubrimiento automático
+    """
+    static_hosts = load_static_hosts()
+    discovered_hosts = discover_hosts(NETWORK_SEGMENTS)
 
-    with open(HOSTS_FILE, "r", encoding="utf-8") as f:
-        hosts = json.load(f)
+    # Evitar duplicados por IP
+    known_ips = {h["ip"] for h in static_hosts}
 
-    validated = []
-    for host in hosts:
-        if "ip" not in host or "name" not in host:
-            continue
+    merged = static_hosts.copy()
+    for host in discovered_hosts:
+        if host["ip"] not in known_ips:
+            merged.append(host)
 
-        validated.append({
-            "ip": host["ip"],
-            "name": host["name"],
-            "services": host.get("services", []),
-            "critical": host.get("critical", False),
-            "type": host.get("type", "unknown")
-        })
-
-    return validated
+    return merged
