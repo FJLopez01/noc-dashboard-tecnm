@@ -183,8 +183,7 @@
                         </button>
                     </div>
                 </div>
-                <div id="live-console" class="console-container"></div>
-            </div>
+            <div id="live-console" class="console-container"></div>
         </div>
     </div>
 
@@ -225,31 +224,40 @@
         </div>
     </div>
 
-        <!-- MODAL AÑADIR SEGMENTO -->
+        <!-- MODAL GESTIÓN DE SEGMENTOS -->
         <div class="modal fade" id="segmentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-card shadow-lg">
-            
+
             <div class="modal-header border-bottom border-secondary border-opacity-25">
                 <h5 class="modal-title fw-bold">
                 <i class="fa-solid fa-network-wired me-2 text-info"></i>
-                Añadir Segmento de Red
+                Gestión de Segmentos de Red
                 </h5>
                 <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
+
                 <input id="segmentInput"
                     class="form-control glass-input"
                     placeholder="Ej: 10.100.10.0/24">
+
                 <small class="text-secondary d-block mt-2">
                 Formato CIDR (ej: /24)
                 </small>
+
+                <hr class="border-secondary border-opacity-25 my-3">
+
+                <ul id="segmentList"
+                    class="list-group list-group-flush small">
+                </ul>
+
             </div>
 
             <div class="modal-footer border-top border-secondary border-opacity-25">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                Cancelar
+                Cerrar
                 </button>
                 <button class="btn btn-info" onclick="saveSegment()">
                 Guardar
@@ -259,6 +267,7 @@
             </div>
         </div>
         </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     

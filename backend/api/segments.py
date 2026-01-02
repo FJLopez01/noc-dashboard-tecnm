@@ -1,7 +1,13 @@
+# backend/api/segments.py
+
 from flask import Blueprint, request, jsonify
 import ipaddress
 
-from backend.services.segment_loader import load_segments, save_segments
+from backend.services.segment_loader import (
+    load_segments,
+    save_segments,
+    delete_segment
+)
 
 bp = Blueprint("segments", __name__, url_prefix="/api")
 
@@ -28,3 +34,10 @@ def add_segment():
         save_segments(segments)
 
     return jsonify({"ok": True, "segments": segments})
+
+
+@bp.route("/segments/<path:segment>", methods=["DELETE"])
+def remove_segment(segment):
+    if delete_segment(segment):
+        return jsonify({"ok": True})
+    return jsonify({"error": "Segmento no encontrado"}), 404

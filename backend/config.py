@@ -1,3 +1,3 @@
+# backend/config.py
 PING_INTERVAL = 5
-NETWORK_SEGMENTS = ["10.100.10.0/24", "10.100.11.0/24"]
-
+SEGMENTS_FILE = "data/segments.json"

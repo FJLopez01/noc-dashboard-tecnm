@@ -397,11 +397,49 @@ async function saveSegment() {
 
     if (res.ok) {
         input.value = "";
+        loadSegments();
         alert("Segmento añadido correctamente");
     } else {
         alert("Segmento inválido");
     }
 }
+
+async function loadSegments() {
+    const res = await fetch("/api/segments");
+    const segments = await res.json();
+
+    const list = document.getElementById("segmentList");
+    list.innerHTML = "";
+
+    segments.forEach(seg => {
+        list.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent text-white">
+                <span class="font-monospace">${seg}</span>
+                <button class="btn btn-sm btn-outline-danger"
+                        onclick="deleteSegment('${seg}')">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </li>
+        `;
+    });
+}
+
+async function deleteSegment(segment) {
+    if (!confirm(`¿Eliminar el segmento ${segment}?`)) return;
+
+    const res = await fetch(`/api/segments/${encodeURIComponent(segment)}`, {
+    method: "DELETE"
+    });
+
+    if (res.ok) {
+        loadSegments();
+    } else {
+        alert("No se pudo eliminar el segmento");
+    }
+}
+
+document.getElementById("segmentModal")
+    .addEventListener("shown.bs.modal", loadSegments);
 
 
 // Actualizar cada 3 segundos
