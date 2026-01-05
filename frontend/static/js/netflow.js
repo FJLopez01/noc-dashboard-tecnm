@@ -1,106 +1,87 @@
-/* static/js/netflow.js */
-
 let ipChart = null;
 let protoChart = null;
 
-async function updateNetflow() {
+async function loadNetflow() {
     try {
-        const res = await fetch('/api/netflow/live');
-        if (!res.ok) throw new Error('NetFlow API error');
-
+        const res = await fetch("/api/traffic");
         const data = await res.json();
 
-        // --- TOTAL TRAFFIC ---
-        const totalMB = (data.total_bytes / (1024 * 1024)).toFixed(2);
-        document.getElementById('total-traffic').innerText = `${totalMB} MB`;
+        // ---------- TOTAL TRAFFIC ----------
+        document.getElementById("total-traffic").innerText =
+            `${data.total_mb} MB`;
 
-        // --- TOP IPs ---
-        const ipLabels = data.top_ips.map(i => i.ip);
-        const ipValues = data.top_ips.map(i => (i.bytes / (1024 * 1024)).toFixed(2));
+        // ---------- TOP IPs ----------
+        const ipLabels = data.ips.map(i => i.ip);
+        const ipValues = data.ips.map(i => (i.bytes / 1024).toFixed(2));
 
-        renderIpChart(ipLabels, ipValues);
+        if (!ipChart) {
+            ipChart = new Chart(document.getElementById("ipChart"), {
+                type: "bar",
+                data: {
+                    labels: ipLabels,
+                    datasets: [{
+                        label: "KB transferidos",
+                        data: ipValues,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } else {
+            ipChart.data.labels = ipLabels;
+            ipChart.data.datasets[0].data = ipValues;
+            ipChart.update();
+        }
 
-        // --- PROTOCOLS ---
-        const protoLabels = Object.keys(data.protocols);
-        const protoValues = Object.values(data.protocols);
+        // ---------- TOP PROTOCOLS ----------
+        const protoLabels = data.protocols.map(p => p.name);
+        const protoValues = data.protocols.map(p => (p.bytes / 1024).toFixed(2));
 
-        renderProtoChart(protoLabels, protoValues);
+        if (!protoChart) {
+            protoChart = new Chart(document.getElementById("protoChart"), {
+                type: "doughnut",
+                data: {
+                    labels: protoLabels,
+                    datasets: [{
+                        data: protoValues
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: {
+                                boxWidth: 12
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            protoChart.data.labels = protoLabels;
+            protoChart.data.datasets[0].data = protoValues;
+            protoChart.update();
+        }
 
     } catch (err) {
-        console.error('NetFlow error:', err);
+        console.error("Error NetFlow:", err);
     }
 }
 
-// ------------------ CHARTS ------------------
+// ---------- REFRESH ----------
+setInterval(loadNetflow, 2000);
+document.addEventListener("DOMContentLoaded", loadNetflow);
 
-function renderIpChart(labels, values) {
-    const ctx = document.getElementById('ipChart').getContext('2d');
-
-    if (ipChart) ipChart.destroy();
-
-    ipChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Consumo (MB)',
-                data: values,
-                borderWidth: 1,
-                backgroundColor: 'rgba(56, 189, 248, 0.6)',
-                borderColor: 'rgba(56, 189, 248, 1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#94a3b8' },
-                    grid: { color: 'rgba(255,255,255,0.05)' }
-                },
-                x: {
-                    ticks: { color: '#94a3b8' },
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-}
-
-function renderProtoChart(labels, values) {
-    const ctx = document.getElementById('protoChart').getContext('2d');
-
-    if (protoChart) protoChart.destroy();
-
-    protoChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: [
-                    '#38bdf8',
-                    '#22c55e',
-                    '#f59e0b',
-                    '#ef4444'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: '#e5e7eb' }
-                }
-            }
-        }
-    });
-}
-
-// --- INTERVAL ---
-setInterval(updateNetflow, 2000);
-updateNetflow();

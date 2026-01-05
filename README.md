@@ -1,130 +1,145 @@
-````markdown
-# 🖥️ NOC Dashboard – Network Monitoring System
+```md
+# 🖥️ NOC Dashboard – TecNM Cancún
 
-Sistema de monitoreo de infraestructura de red (NOC) desarrollado en Python, diseñado para supervisar **disponibilidad, latencia, servicios y tráfico de red**, inspirado en herramientas empresariales como Zabbix, Nagios y NetFlow.
+Sistema de Monitoreo de Red (NOC – Network Operations Center) desarrollado para visualizar en tiempo real el estado, disponibilidad y tráfico de la infraestructura de red del **TecNM Cancún**.
 
-El proyecto implementa una **arquitectura modular**, separando claramente la recolección de métricas, la persistencia de datos, la API y la visualización.
+El proyecto integra monitoreo ICMP, escaneo de servicios, análisis de tráfico tipo NetFlow y visualización web en tiempo real mediante una arquitectura modular Backend + API + Frontend.
 
 ---
 
-## 🚀 Características Principales
+## 🚀 Funcionalidades Principales
 
-### ✅ Monitoreo de Disponibilidad (ICMP)
-- Verificación periódica de estado **Online / Offline**
+### 🔌 Monitoreo de Disponibilidad (ICMP)
+- Verificación de estado **Online / Offline**
 - Medición de **latencia en milisegundos**
-- Registro histórico en base de datos
-
-### ✅ Inspección de Servicios (Capa 4)
-- Escaneo TCP de puertos configurables por host
-- Validación de servicios críticos (HTTP, HTTPS, SSH, DNS, SQL)
-
-### ✅ Cálculo de SLA / Uptime
-- Métrica de disponibilidad basada en **tiempo real**
-- Cálculo histórico configurable (últimas 24h por defecto)
-- Implementación basada en diferencias temporales (no contadores simples)
-
-### ✅ Análisis de Red en Tiempo Real
-- Estado actual almacenado en memoria (RAM)
-- API rápida sin impacto en la red
-- Arquitectura preparada para integración NetFlow (Scapy)
-
-### ✅ Descubrimiento de Red
-- Detección automática de hosts activos en la red
-- Resolución de hostname
-- Inventario persistente en JSON sin duplicados
-
-### ✅ Reportes
-- Exportación de métricas históricas a CSV
-- Latencia promedio y SLA por host
+- Actualización periódica automática
+- Registro histórico de latencia
 
 ---
 
-## 🏗️ Arquitectura del Sistema
-
-```text
-Scheduler (Thread en background)
- ├─ ICMP Ping
- ├─ Port Scan
- ├─ Cálculo de métricas
- ├─ Persistencia (SQLite)
- └─ Estado actual (RAM)
-
-Flask API
- ├─ /api/status      → Estado actual desde memoria
- ├─ /api/history/ip  → Históricos de latencia
- └─ /api/export      → Reportes CSV
-
-Frontend
- └─ Dashboard web con KPIs y gráficas
-````
-
-### 📌 Principios de diseño
-
-* El **API no ejecuta tareas de red**
-* El **scheduler es la única fuente de monitoreo**
-* La memoria se usa para **tiempo real**
-* La base de datos se usa para **histórico y SLA**
+### 🧩 Inspección de Servicios (Capa 4 / 7)
+- Escaneo de puertos TCP específicos:
+  - HTTP (80)
+  - HTTPS (443)
+  - SSH (22)
+  - DNS (53)
+  - SQL (MySQL / PostgreSQL)
+- Estado **OPEN / CLOSED**
+- Visualización directa en el dashboard
 
 ---
 
-## 📂 Estructura del Proyecto
+### 📡 Análisis de Tráfico en Vivo (NetFlow Simulado)
+- Captura de paquetes en tiempo real con **Scapy**
+- Métricas mostradas:
+  - 🔝 Top 5 IPs consumidoras de tráfico
+  - 📊 Distribución de protocolos (gráficas de dona)
+  - 💾 Volumen total de datos transferidos
+- Actualización continua sin recargar la página
 
-```text
-noc-dashboard/
-│
-├── backend/
-│   ├── services/        # Lógica de negocio (ping, scan, scheduler)
-│   ├── api/             # Endpoints REST
-│   ├── storage/         # Persistencia (SQLite + RAM)
-│   └── config.py
-│
-├── frontend/
-│   ├── templates/       # HTML
-│   └── static/          # JS, CSS
-│
-├── data/
-│   ├── hosts.json       # Inventario
-│   └── history.db      # Métricas históricas
-│
-├── docs/
-│   ├── architecture.md
-│   └── screenshots/
-│
-├── run.py
-├── requirements.txt
-└── README.md
+> ⚠️ Requiere permisos de administrador para captura de tráfico.
+
+---
+
+### 📈 Cálculo de SLA / Uptime
+- Cálculo histórico de disponibilidad por nodo
+- Métrica porcentual de uptime
+- Visualización clara por host
+
+---
+
+### 🖥 Consola de Tráfico en Vivo
+- Log estilo **Wireshark**
+- Eventos ICMP en tiempo real
+- Visualización clara de latencia y errores
+- Control de limpieza de consola
+
+---
+
+### 📄 Reportes
+- Exportación de datos históricos en formato **CSV**
+- Información lista para auditoría o análisis externo
+
+---
+
+## 🧱 Arquitectura del Sistema
+
 ```
 
+noc-dashboard-tecnm/
+│
+├── backend/
+│   ├── api/                # Endpoints REST
+│   ├── services/           # ICMP, NetFlow, Scheduler
+│   ├── storage/            # Base de datos SQLite
+│   └── app.py              # Inicialización Flask
+│
+├── frontend/
+│   ├── templates/          # HTML (Jinja2)
+│   └── static/
+│       ├── css/
+│       └── js/
+│
+├── run.py                  # Punto de entrada
+├── requirements.txt
+└── README.md
+
+````
+
+**Separación estricta de responsabilidades:**
+- Backend → Recolección y procesamiento de datos
+- API → Exposición de información
+- Frontend → Visualización y experiencia de usuario
+
 ---
 
-## ⚙️ Tecnologías Utilizadas
+## 🛠️ Tecnologías Utilizadas
 
-* **Python 3**
-* **Flask**
-* **SQLite**
-* **ping3**
-* **Sockets TCP**
-* **Threading / ThreadPoolExecutor**
-* **Scapy (NetFlow – en progreso)**
-* **HTML / CSS / JavaScript**
+### Backend
+- Python 3.11
+- Flask
+- Scapy
+- Ping3
+- APScheduler
+- SQLite
+
+### Frontend
+- HTML5 + CSS3
+- Bootstrap 5
+- JavaScript (Fetch API)
+- Chart.js
+- Font Awesome
 
 ---
 
-## ▶️ Ejecución del Proyecto
+## ⚙️ Instalación y Ejecución
 
-### 1️⃣ Instalar dependencias
+### 1️⃣ Clonar el repositorio
+```bash
+git clone https://github.com/FJLopez01/noc-dashboard-tecnm.git
+cd noc-dashboard-tecnm
+````
+
+### 2️⃣ Crear entorno virtual (Python 3.11)
+
+```bash
+py -3.11 -m venv venv
+venv\Scripts\activate
+```
+
+### 3️⃣ Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2️⃣ Ejecutar el sistema
+### 4️⃣ Ejecutar la aplicación (como Administrador)
 
 ```bash
 python run.py
 ```
 
-### 3️⃣ Acceder al dashboard
+Acceder desde el navegador:
 
 ```
 http://localhost:5000
@@ -132,39 +147,23 @@ http://localhost:5000
 
 ---
 
-## 📈 Ejemplo de Métricas
+## 🔐 Permisos Importantes
 
-* Latencia promedio por host
-* Estado actual de servicios
-* SLA porcentual (últimas 24h)
-* Historial gráfico de latencia
+Para que el **análisis de tráfico (NetFlow)** funcione correctamente:
 
----
+* Ejecutar la aplicación como **Administrador**
+* Permitir captura de paquetes (Scapy)
 
-## 🔒 Consideraciones de Seguridad
-
-* El escaneo de red se ejecuta solo en entornos controlados
-* El sistema no ejecuta acciones destructivas
-* Diseñado para redes locales y laboratorios
+En caso contrario, las gráficas de tráfico no mostrarán datos.
 
 ---
 
-## 🧠 Aprendizajes Clave
+## 📌 Estado del Proyecto
 
-* Diseño de sistemas de monitoreo
-* Separación correcta entre recolección y visualización
-* Manejo de métricas históricas
-* Arquitectura escalable basada en eventos
-* Networking (ICMP, TCP, SLA, Discovery)
-
----
-
-## 📌 Roadmap
-
-* Integración completa de NetFlow con Scapy
-* Alertas por umbral (email / webhook)
-* Autenticación y roles
-* Dashboard avanzado con filtros
+✔ Funcional
+✔ Estable
+✔ Listo para entrega académica
+✔ Escalable para producción
 
 ---
 
@@ -172,9 +171,15 @@ http://localhost:5000
 
 **Frank Joseph López Cruz**
 Ingeniería en Datos e Inteligencia Organizacional
+Universidad del Caribe
 
 **Eduardo Mauricio Garrido Rodriguez**
 Ingeniería en Datos e Inteligencia Organizacional
+Universidad del Carine
+---
 
-Este proyecto fue desarrollado como parte de un portafolio profesional enfocado en **infraestructura, monitoreo y análisis de datos**.
+## 📄 Licencia
 
+Proyecto académico con fines educativos.
+
+```
