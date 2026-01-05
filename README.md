@@ -1,99 +1,100 @@
-```md
-# 🖥️ NOC Dashboard – TecNM Cancún
+# 🖥️ NOC Dashboard – Network Monitoring Platform
 
-Sistema de Monitoreo de Red (NOC – Network Operations Center) desarrollado para visualizar en tiempo real el estado, disponibilidad y tráfico de la infraestructura de red del **TecNM Cancún**.
+**NOC Dashboard** es una plataforma web de **monitoreo de red en tiempo real**, desarrollada para supervisar disponibilidad, servicios y tráfico de infraestructura IP.  
+El sistema replica funcionalidades clave de un **Network Operations Center (NOC)** mediante una arquitectura modular y escalable.
 
-El proyecto integra monitoreo ICMP, escaneo de servicios, análisis de tráfico tipo NetFlow y visualización web en tiempo real mediante una arquitectura modular Backend + API + Frontend.
-
----
-
-## 🚀 Funcionalidades Principales
-
-### 🔌 Monitoreo de Disponibilidad (ICMP)
-- Verificación de estado **Online / Offline**
-- Medición de **latencia en milisegundos**
-- Actualización periódica automática
-- Registro histórico de latencia
+📍 **Caso de uso:** Infraestructura del TecNM Cancún  
+🎯 **Objetivo:** Visibilidad operacional, análisis de disponibilidad y tráfico, y generación de reportes.
 
 ---
 
-### 🧩 Inspección de Servicios (Capa 4 / 7)
-- Escaneo de puertos TCP específicos:
-  - HTTP (80)
-  - HTTPS (443)
-  - SSH (22)
-  - DNS (53)
+## 🚀 Principales Capacidades
+
+### 🔌 Network Availability Monitoring (ICMP)
+- Detección de estado **Online / Offline**
+- Medición de **latencia (ms)**
+- Monitoreo continuo con actualización automática
+- Persistencia de datos históricos
+
+---
+
+### 🧩 Service Monitoring (Layer 4 / 7)
+- Escaneo de servicios TCP críticos:
+  - HTTP / HTTPS
+  - SSH
+  - DNS
   - SQL (MySQL / PostgreSQL)
-- Estado **OPEN / CLOSED**
-- Visualización directa en el dashboard
+- Verificación de puertos **OPEN / CLOSED**
+- Visualización directa por host
 
 ---
 
-### 📡 Análisis de Tráfico en Vivo (NetFlow Simulado)
+### 📡 Live Traffic Analysis (NetFlow Simulation)
 - Captura de paquetes en tiempo real con **Scapy**
-- Métricas mostradas:
+- Métricas generadas:
   - 🔝 Top 5 IPs consumidoras de tráfico
-  - 📊 Distribución de protocolos (gráficas de dona)
+  - 📊 Distribución de protocolos (Donut Charts)
   - 💾 Volumen total de datos transferidos
-- Actualización continua sin recargar la página
+- Renderizado dinámico sin recarga de página
 
-> ⚠️ Requiere permisos de administrador para captura de tráfico.
+> ⚠️ Requiere ejecución con privilegios de administrador para captura de tráfico.
 
 ---
 
-### 📈 Cálculo de SLA / Uptime
+### 📈 SLA & Uptime Calculation
 - Cálculo histórico de disponibilidad por nodo
 - Métrica porcentual de uptime
-- Visualización clara por host
+- Apoyo para análisis de cumplimiento de SLA
 
 ---
 
-### 🖥 Consola de Tráfico en Vivo
-- Log estilo **Wireshark**
-- Eventos ICMP en tiempo real
-- Visualización clara de latencia y errores
-- Control de limpieza de consola
+### 🖥 Live Traffic Console
+- Consola en tiempo real estilo **Wireshark**
+- Eventos ICMP y latencia
+- Registro continuo de actividad
+- Limpieza y control visual desde UI
 
 ---
 
-### 📄 Reportes
+### 📄 Reporting & Export
 - Exportación de datos históricos en formato **CSV**
-- Información lista para auditoría o análisis externo
+- Datos listos para:
+  - Auditoría
+  - Análisis externo
+  - Reportes ejecutivos
 
 ---
 
-## 🧱 Arquitectura del Sistema
-
-```
-
+## 🧱 System Architecture
 noc-dashboard-tecnm/
 │
 ├── backend/
-│   ├── api/                # Endpoints REST
-│   ├── services/           # ICMP, NetFlow, Scheduler
-│   ├── storage/            # Base de datos SQLite
-│   └── app.py              # Inicialización Flask
+│ ├── api/ # REST API endpoints
+│ ├── services/ # ICMP, NetFlow, Scheduler
+│ ├── storage/ # SQLite persistence
+│ └── app.py # Flask app factory
 │
 ├── frontend/
-│   ├── templates/          # HTML (Jinja2)
-│   └── static/
-│       ├── css/
-│       └── js/
+│ ├── templates/ # Jinja2 templates
+│ └── static/
+│ ├── css/
+│ └── js/
 │
-├── run.py                  # Punto de entrada
+├── run.py # Application entry point
 ├── requirements.txt
 └── README.md
 
-````
+---
 
-**Separación estricta de responsabilidades:**
-- Backend → Recolección y procesamiento de datos
-- API → Exposición de información
-- Frontend → Visualización y experiencia de usuario
+### Architectural Principles
+- **Separation of Concerns**
+- **Modular backend services**
+- **Decoupled API & frontend**
+- **Scalable design for production environments**
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Technology Stack
 
 ### Backend
 - Python 3.11
@@ -104,7 +105,7 @@ noc-dashboard-tecnm/
 - SQLite
 
 ### Frontend
-- HTML5 + CSS3
+- HTML5 / CSS3
 - Bootstrap 5
 - JavaScript (Fetch API)
 - Chart.js
@@ -112,74 +113,60 @@ noc-dashboard-tecnm/
 
 ---
 
-## ⚙️ Instalación y Ejecución
+## ⚙️ Installation & Execution
 
-### 1️⃣ Clonar el repositorio
+### 1️⃣ Clone repository
 ```bash
 git clone https://github.com/FJLopez01/noc-dashboard-tecnm.git
 cd noc-dashboard-tecnm
-````
+```
 
-### 2️⃣ Crear entorno virtual (Python 3.11)
-
+### 2️⃣ Create virtual environment (Python 3.11)
 ```bash
 py -3.11 -m venv venv
 venv\Scripts\activate
 ```
 
-### 3️⃣ Instalar dependencias
-
+### 3️⃣ Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4️⃣ Ejecutar la aplicación (como Administrador)
-
+### 4️⃣ Run application (Administrator privileges required)
 ```bash
 python run.py
 ```
 
-Acceder desde el navegador:
-
-```
+### Access via browser:
+```bash
 http://localhost:5000
 ```
 
----
+## 🔐 Required Permissions
 
-## 🔐 Permisos Importantes
+To enable Live Traffic Analysis (NetFlow):
+- Run the application as Administrator
+- Allow packet capture (Scapy)
+- Without elevated privileges, traffic charts will not display data.
 
-Para que el **análisis de tráfico (NetFlow)** funcione correctamente:
+## 📌 Project Status
 
-* Ejecutar la aplicación como **Administrador**
-* Permitir captura de paquetes (Scapy)
+✔ Production-ready prototype
+✔ Stable
+✔ Academic & professional use
+✔ Easily extensible (SNMP, alerts, auth, Docker)
 
-En caso contrario, las gráficas de tráfico no mostrarán datos.
+## 👨‍💻 Authors
 
----
+Frank Joseph López Cruz
+Data Engineering & Organizational Intelligence
+Universidad del Caribe
+🔗 GitHub: https://github.com/FJLopez01
 
-## 📌 Estado del Proyecto
-
-✔ Funcional
-✔ Estable
-✔ Listo para entrega académica
-✔ Escalable para producción
-
----
-
-## 👨‍💻 Autores
-
-**Frank Joseph López Cruz**
-Ingeniería en Datos e Inteligencia Organizacional
+Eduardo Mauricio Garrido Rodríguez
+Data Engineering & Organizational Intelligence
 Universidad del Caribe
 
-**Eduardo Mauricio Garrido Rodriguez**
-Ingeniería en Datos e Inteligencia Organizacional
-Universidad del Carine
----
+📄 License
 
-## 📄 Licencia
-
-Proyecto académico con fines educativos.
-
-```
+Academic project for educational and demonstration purposes.
