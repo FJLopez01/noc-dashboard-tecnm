@@ -166,6 +166,11 @@
             </div>
         </div>
 
+        <!-- ===================== GRUPOS VISUALES ===================== -->
+        <div id="groups-container" class="container mb-5">
+            <!-- Se renderizan aquí los grupos de red (mockup visual) -->
+        </div>
+
         <!-- ===================== GRÁFICAS NETFLOW ===================== -->
         <!-- Estructura visual de gráficas.
         Los datos se cargan desde netflow.js -->
@@ -331,5 +336,8 @@
     <script src="{{ url_for('static', filename='js/clock.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='js/netflow.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/groups.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/grouping.js') }}"></script>
+
 </body>
 </html>

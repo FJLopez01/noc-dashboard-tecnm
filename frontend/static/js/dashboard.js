@@ -231,6 +231,9 @@ async function update() {
             if (searchTerm === '') {
                 addLogToConsole(host, displayName);
             }
+
+            renderGroups(rawData);
+
         });
 
     } catch (error) {
@@ -503,6 +506,74 @@ async function deleteSegment(segment) {
         alert("No se pudo eliminar el segmento");
     }
 }
+
+/* =========================================
+    AGRUPACIÓN VISUAL POR SEGMENTO (MOCKUP)
+    NO impacta backend
+========================================= */
+
+function groupHostsBySegment(hosts) {
+    const groups = {};
+
+    hosts.forEach(host => {
+        const ip = host.ip_address || "0.0.0.0";
+        const segment = ip.split(".").slice(0, 3).join(".") + ".0/24";
+
+        if (!groups[segment]) {
+            groups[segment] = [];
+        }
+        groups[segment].push(host);
+    });
+
+    return groups;
+}
+
+function renderGroups(hosts) {
+    const container = document.getElementById("groups-container");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const groups = groupHostsBySegment(hosts);
+
+    Object.entries(groups).forEach(([segment, hosts]) => {
+        const online = hosts.filter(h => h.status === "online").length;
+
+        const card = document.createElement("div");
+        card.className = "glass-card p-4 mb-4";
+
+        card.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 text-info">
+                    <i class="fa-solid fa-network-wired me-2"></i>
+                    Segmento ${segment}
+                </h5>
+                <span class="badge bg-primary bg-opacity-25">
+                    ${online}/${hosts.length} online
+                </span>
+            </div>
+
+            <div class="row g-3">
+                ${hosts.map(h => `
+                    <div class="col-md-4">
+                        <div class="p-3 rounded bg-dark bg-opacity-50">
+                            <strong>${h.host_name || h.ip_address}</strong><br>
+                            <small class="text-secondary">${h.ip_address}</small><br>
+                            <span class="badge ${
+                                h.status === "online" ? "bg-success" : "bg-danger"
+                            } mt-2">
+                                ${h.status}
+                            </span>
+                        </div>
+                    </div>
+                `).join("")}
+            </div>
+        `;
+
+    container.appendChild(card);
+});
+}
+
 
 document.getElementById("segmentModal")
     .addEventListener("shown.bs.modal", loadSegments);
