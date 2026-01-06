@@ -2,14 +2,26 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime
 
+# Ruta del archivo de base de datos SQLite
 DB_PATH = Path("data/history.db")
 
+
 def get_connection():
+    """
+    Retorna una nueva conexión a la base de datos SQLite.
+    """
     return sqlite3.connect(DB_PATH)
 
+
 def init_db():
+    """
+    Inicializa las tablas necesarias para el sistema de monitoreo.
+    Se ejecuta una sola vez al iniciar la aplicación.
+    """
     with get_connection() as conn:
         cursor = conn.cursor()
+
+        # Historial de latencias por IP
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS latency_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,7 +30,8 @@ def init_db():
                 timestamp TEXT NOT NULL
             )
         """)
-        
+
+        # Historial de estados (online/offline)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS uptime_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,11 +40,14 @@ def init_db():
                 timestamp TEXT NOT NULL
             )
         """)
-        
+
         conn.commit()
 
 
 def insert_latency(ip, latency_ms):
+    """
+    Inserta un registro de latencia para una IP específica.
+    """
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -39,9 +55,12 @@ def insert_latency(ip, latency_ms):
             VALUES (?, ?, ?)
         """, (ip, latency_ms, datetime.utcnow().isoformat()))
         conn.commit()
-        
-        
+
+
 def insert_uptime(ip, is_online):
+    """
+    Inserta el estado online/offline de una IP.
+    """
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -52,6 +71,10 @@ def insert_uptime(ip, is_online):
 
 
 def get_last_latencies(ip, limit=20):
+    """
+    Obtiene las últimas mediciones de latencia de una IP,
+    ordenadas cronológicamente para el frontend.
+    """
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -63,7 +86,7 @@ def get_last_latencies(ip, limit=20):
         """, (ip, limit))
         rows = cursor.fetchall()
 
-    # Se invierte para orden cronológico (frontend)
+    # Se invierte el orden para graficar correctamente
     return [
         {"timestamp": ts, "latency_ms": lat}
         for ts, lat in reversed(rows)

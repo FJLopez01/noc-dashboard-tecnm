@@ -11,11 +11,16 @@ from backend.storage.database import insert_latency, insert_uptime
 from backend.storage.memory_store import update_host_status
 from backend.config import PING_INTERVAL
 
-
+# Intervalo para redescubrimiento completo de hosts (segundos)
 DISCOVERY_INTERVAL = 300  # 5 minutos
 
 
 def monitor_loop():
+    """
+    Bucle principal del sistema de monitoreo.
+    Ejecuta ping, escaneo de puertos, persistencia
+    y actualización de estado en memoria.
+    """
     print("[SCHEDULER] Monitor iniciado")
 
     last_inventory_reload = 0
@@ -25,35 +30,40 @@ def monitor_loop():
     while True:
         now = time.time()
 
-        # 🔄 Reload inventario periódico
+        # Redescubrimiento periódico de hosts
         if now - last_inventory_reload > DISCOVERY_INTERVAL:
             hosts = load_hosts()
             last_inventory_reload = now
             print(f"[SCHEDULER] Hosts cargados: {len(hosts)}")
 
-        # 🔄 Detectar cambios en segments.json
+        # Detectar cambios en segments.json
         segments_mtime = segments_last_modified()
-
         if segments_mtime > last_segments_mtime:
             hosts = load_hosts()
             last_segments_mtime = segments_mtime
             print("[SCHEDULER] Segmentos actualizados → rediscovery")
 
+        # Monitoreo individual por host
         for host in hosts:
             ip = host["ip"]
             name = host.get("name", ip)
             services_cfg = host.get("services", [])
 
+            # Ping ICMP
             is_online, latency = ping_host(ip)
             timestamp = datetime.utcnow().isoformat()
 
+            # Registro de uptime
             insert_uptime(ip, is_online)
 
+            # Registro de latencia solo si está disponible
             if is_online and latency is not None:
                 insert_latency(ip, latency)
 
+            # Escaneo de puertos solo si el host está online
             services = scan_ports(ip, services_cfg) if is_online else ""
 
+            # Actualización de estado en memoria
             update_host_status(ip, {
                 "ip_address": ip,
                 "host_name": name,
@@ -65,4 +75,5 @@ def monitor_loop():
 
             print(f"[{timestamp}] {ip} → {'ONLINE' if is_online else 'OFFLINE'}")
 
+        # Espera antes del siguiente ciclo
         time.sleep(PING_INTERVAL)

@@ -1,43 +1,76 @@
 <!DOCTYPE html>
+<!--
+    Documento principal del NOC Dashboard
+    Este archivo define únicamente la ESTRUCTURA VISUAL del sistema.
+    La lógica y los datos se cargan dinámicamente vía JavaScript.
+-->
 <html lang="es" data-bs-theme="dark">
 <head>
+    <!-- Configuración básica del documento -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Metadatos informativos (SEO / referencia académica) -->
     <meta name="description" content="Sistema de Monitoreo de Red - NOC Dashboard TecNM Cancún">
     <meta name="author" content="Martha - TecNM Cancún">
+    
     <title>NOC Dashboard | TecNM Cancún</title>
     
-    <!-- Favicon -->
+    <!-- Favicon del sistema -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     
+    <!-- Framework CSS (solo presentación visual) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Íconos (uso visual) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Fuente tipográfica -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Librería para gráficas (los datos se cargan por JS) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Estilos personalizados del dashboard -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
+
 <body>
 
+    <!-- ===================== NAVBAR SUPERIOR ===================== -->
+    <!-- Barra de navegación fija: solo estructura visual -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-glass">
         <div class="container">
+
+            <!-- Logo / Branding -->
             <a class="navbar-brand fw-bold" href="#">
                 <i class="fa-solid fa-network-wired me-2 text-primary"></i>
                 NOC <span class="text-primary">TecNM</span>
             </a>
             
+            <!-- Buscador (interacción controlada desde dashboard.js) -->
             <div class="d-none d-md-block mx-auto">
                 <div class="search-container">
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" id="searchInput" class="glass-input" placeholder="Buscar host o IP..." autocomplete="off">
+                    <input type="text"
+                        id="searchInput"
+                        class="glass-input"
+                        placeholder="Buscar host o IP..."
+                        autocomplete="off">
                 </div>
             </div>
 
+            <!-- Acciones de la barra superior -->
             <div class="d-flex align-items-center gap-3">
-                <span id="live-clock" class="navbar-text text-white-50 fs-6 d-none d-lg-block font-monospace">
+
+                <!-- Reloj en tiempo real (clock.js) -->
+                <span id="live-clock" 
+                    class="navbar-text text-white-50 fs-6 d-none d-lg-block font-monospace">
                     --:--:--
                 </span>
 
+                <!-- Botón para abrir modal de segmentos -->
                 <button class="btn btn-sm btn-outline-info d-flex align-items-center gap-2 glass-card"
                         data-bs-toggle="modal"
                         data-bs-target="#segmentModal">
@@ -45,6 +78,7 @@
                     <span class="d-none d-md-inline">Segmentos</span>
                 </button>
 
+                <!-- Exportación de datos (backend) -->
                 <a href="/api/export" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 glass-card border-primary text-white" download>
                     <i class="fa-solid fa-cloud-arrow-down"></i>
                     <span class="d-none d-md-inline">Exportar</span>
@@ -53,10 +87,14 @@
         </div>
     </nav>
 
+    <!-- ===================== CONTENIDO PRINCIPAL ===================== -->
     <div class="container" style="margin-top: 100px; flex: 1;">
 
+        <!-- Estas tarjetas solo muestran valores.
+        Los números se inyectan dinámicamente desde JS -->
         <!-- KPIs PRINCIPALES -->
         <div class="row mb-4">
+            <!-- Total de hosts -->
             <div class="col-md-4">
                 <div class="glass-card p-3 d-flex align-items-center justify-content-between hover-lift">
                     <div>
@@ -68,6 +106,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Hosts online -->
             <div class="col-md-4">
                 <div class="glass-card p-3 d-flex align-items-center justify-content-between hover-lift">
                     <div>
@@ -79,6 +119,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Hosts con problemas -->
             <div class="col-md-4">
                 <div class="glass-card p-3 d-flex align-items-center justify-content-between hover-lift">
                     <div>
@@ -106,9 +148,12 @@
             </div>
         </div>
 
-        <!-- GRID DE HOSTS -->
+        <!-- ===================== GRID DE HOSTS ===================== -->
+        <!-- Aquí se renderizan dinámicamente las tarjetas de hosts -->
         <div id="grid" class="row g-4 mb-5">
-            <!-- LOADER INICIAL -->
+
+
+            <!-- Loader visible mientras no hay datos -->
             <div class="col-12 text-center py-5" id="initial-loader">
                 <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                     <span class="visually-hidden">Cargando...</span>
@@ -121,7 +166,9 @@
             </div>
         </div>
 
-        <!-- ANÁLISIS DE TRÁFICO NETFLOW -->
+        <!-- ===================== GRÁFICAS NETFLOW ===================== -->
+        <!-- Estructura visual de gráficas.
+        Los datos se cargan desde netflow.js -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="glass-card p-4">
@@ -166,7 +213,9 @@
             </div>
         </div>
 
-        <!-- CONSOLA EN VIVO -->
+        <!-- ===================== CONSOLA EN VIVO ===================== -->
+        <!-- Solo contenedor visual.
+        El texto se inyecta desde JS -->
         <div class="row">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -200,7 +249,11 @@
         </p>
     </footer>
 
-    <!-- MODAL HISTORIAL DE LATENCIA -->
+    <!-- ===================== MODALES ===================== -->
+
+    
+    <!-- Modal de historial de latencia -->
+    <!-- El canvas se llena dinámicamente -->
     <div class="modal fade" id="historyModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content shadow-lg">
@@ -224,7 +277,9 @@
         </div>
     </div>
 
-        <!-- MODAL GESTIÓN DE SEGMENTOS -->
+
+    <!-- Modal de gestión de segmentos -->
+    <!-- Visualmente puede funcionar como mockup sin backend -->
         <div class="modal fade" id="segmentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-card shadow-lg">
@@ -268,9 +323,11 @@
         </div>
         </div>
 
-
+    <!-- ===================== SCRIPTS ===================== -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- Scripts propios -->
     <script src="{{ url_for('static', filename='js/clock.js') }}"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='js/netflow.js') }}"></script>

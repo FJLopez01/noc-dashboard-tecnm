@@ -1,43 +1,76 @@
-/* static/js/dashboard.js - VERSIÓN FINAL PULIDA */
+/* ============================================================
+    DASHBOARD.JS
+    Lógica principal del Frontend del NOC Dashboard
+    ------------------------------------------------------------
+    - Consume APIs del backend
+    - Renderiza tarjetas de hosts
+    - Maneja búsqueda, KPIs, consola y gráficas
+   ============================================================ */
 
+/* ============================================================
+    VARIABLES GLOBALES
+    ============================================================ */
+
+// Referencia a la gráfica de historial (Chart.js)
 let myChart = null;
+
+// Guarda el último estado recibido para evitar renders innecesarios
 let lastDataString = null;
 
+
+/* ============================================================
+    FUNCIÓN PRINCIPAL DE ACTUALIZACIÓN
+    Se ejecuta cada 3 segundos
+    ============================================================ */
 async function update() {
     try {
+        // Petición al backend con el estado actual de la red
         const res = await fetch('/api/status');
         
+        // Validación HTTP básica
         if (!res.ok) {
             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
         
+        // Datos crudos del backend (array de hosts)
         const rawData = await res.json();
         
-        // Eliminar loader inicial si existe
+        /* ====================================================
+            LOADER INICIAL
+            ==================================================== */
         const loader = document.getElementById('initial-loader');
         if (loader) {
             loader.style.opacity = '0';
             setTimeout(() => loader.remove(), 300);
         }
         
-        // --- OPTIMIZACIÓN: Solo redibujar si los datos cambiaron ---
+        /* ====================================================
+            OPTIMIZACIÓN
+            Solo redibujar si los datos cambiaron
+        ==================================================== */
         const currentDataString = JSON.stringify(rawData);
         if (currentDataString === lastDataString) {
-            return;
+            return; // No hay cambios → no renderiza
         }
         lastDataString = currentDataString;
         
-        // --- LÓGICA DE BÚSQUEDA ---
+        /* ====================================================
+            BÚSQUEDA EN TIEMPO REAL
+            ==================================================== */
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
+        // Filtrar hosts por IP o nombre
         const data = rawData.filter(host => {
             const ip = host.ip_address.toLowerCase();
             const name = (host.host_name || '').toLowerCase();
             return ip.includes(searchTerm) || name.includes(searchTerm);
         });
 
-        // Contadores (basados en datos sin filtrar)
+
+        /* ====================================================
+            KPIs (NO dependen del filtro)
+            ==================================================== */
         const total = rawData.length; 
         const online = rawData.filter(host => host.status === 'online').length;
         const offline = total - online;
@@ -47,10 +80,14 @@ async function update() {
         animateNumber('online-count', online);
         animateNumber('offline-count', offline);
 
+
+        /* ====================================================
+            GRID DE HOSTS
+            ==================================================== */
         const grid = document.getElementById('grid');
         grid.innerHTML = ''; 
 
-        // Si no hay resultados de búsqueda
+        // Caso si no hay resultados de búsqueda
         if (data.length === 0) {
             grid.innerHTML = `
                 <div class="col-12 text-center py-5 opacity-50" style="animation: fadeIn 0.5s ease-out;">
@@ -64,8 +101,16 @@ async function update() {
             return;
         }
 
+
+        /* ====================================================
+            RENDER DE CADA HOST
+            ==================================================== */
         data.forEach(host => {
-            // 1. Estilos y Estados Básicos
+            
+
+            /* -----------------------------------------------
+                ESTADO Y LATENCIA
+                ----------------------------------------------- */
             let statusClass = 'status-offline';
             let statusText = 'OFFLINE';
             let icon = '<i class="fa-solid fa-triangle-exclamation text-danger fa-2x"></i>';
@@ -93,14 +138,22 @@ async function update() {
                 latencyHtml = `<span class="fs-3 fw-bold ${latencyColor}">${host.latency_ms}</span> <span class="text-secondary fs-6">ms</span>`;
             }
 
-            // 2. LÓGICA DE UPTIME
+
+            /* -----------------------------------------------
+                UPTIME
+                ----------------------------------------------- */
             let uptimeVal = host.uptime_percent ? host.uptime_percent.toFixed(1) : '100.0';
             let uptimeClass = 'uptime-high'; 
             if (uptimeVal < 80) uptimeClass = 'uptime-low';
             else if (uptimeVal < 95) uptimeClass = 'uptime-med';
 
-            // 3. LÓGICA DE SERVICIOS (PUERTOS)
+
+            /* -----------------------------------------------
+                SERVICIOS / PUERTOS
+                ----------------------------------------------- */
             let servicesHtml = '';
+
+
             if (host.services && host.services.length > 0) {
                 const servicesList = host.services.split('|');
                 
@@ -130,7 +183,9 @@ async function update() {
                 servicesHtml += '</div>';
             }
 
-            // 4. Generar Tarjeta HTML
+            /* -----------------------------------------------
+                TARJETA FINAL
+                ----------------------------------------------- */
             const cardHTML = `
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="card glass-card h-100 p-3" onclick="loadHistory('${host.ip_address}')" title="Click para ver historial">
@@ -172,7 +227,7 @@ async function update() {
             `;
             grid.innerHTML += cardHTML;
 
-            // Agregar log a consola solo si no hay búsqueda activa
+            // Agregar log a consola solo si NO hay búsqueda activa
             if (searchTerm === '') {
                 addLogToConsole(host, displayName);
             }
@@ -197,7 +252,10 @@ async function update() {
     }
 }
 
-// --- ANIMACIÓN DE NÚMEROS ---
+
+/* ============================================================
+    ANIMACIÓN DE KPIs
+    ============================================================ */
 function animateNumber(elementId, targetValue) {
     const element = document.getElementById(elementId);
     const currentValue = parseInt(element.innerText) || 0;
@@ -222,7 +280,9 @@ function animateNumber(elementId, targetValue) {
     }, stepDuration);
 }
 
-// --- FUNCIÓN CONSOLA WIRESHARK ---
+/* ============================================================
+    CONSOLA TIPO WIRESHARK (VISUAL)
+    ============================================================ */
 function addLogToConsole(host, name) {
     const consoleDiv = document.getElementById('live-console');
     if (!consoleDiv) return; 
@@ -270,7 +330,9 @@ function clearConsole() {
     }
 }
 
-// --- FUNCIÓN GRÁFICAS ---
+/* ============================================================
+    HISTORIAL DE LATENCIA (MODAL + CHART.JS)
+    ============================================================ */
 async function loadHistory(ip) {
     const modal = new bootstrap.Modal(document.getElementById('historyModal'));
     document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-chart-line me-2 text-primary"></i> Historial: ${ip}`;
@@ -365,7 +427,9 @@ async function loadHistory(ip) {
     }
 }
 
-// --- BÚSQUEDA EN TIEMPO REAL ---
+/* ============================================================
+    EVENTOS Y AUTO-REFRESH
+    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -381,7 +445,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-    // --- GESTIÓN DE SEGMENTOS ---
+/* ============================================================
+    GESTION DE SEGMENTOS
+    ============================================================ */
 async function saveSegment() {
     const input = document.getElementById("segmentInput");
     if (!input) return;
