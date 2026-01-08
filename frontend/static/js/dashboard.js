@@ -540,7 +540,7 @@ function renderGroups(hosts) {
         const online = hosts.filter(h => h.status === "online").length;
 
         const card = document.createElement("div");
-        card.className = "glass-card p-4 mb-4";
+        card.className = "glass-card segment-card p-4 mb-4";
 
         card.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-3">

@@ -388,3 +388,57 @@ footer a:hover {
     transform: scale(1.05);
     background-color: rgba(56, 189, 248, 0.3) !important;
 }
+
+/* ===========================
+    BLOQUES DEL DASHBOARD
+=========================== */
+
+/* Bloques principales del dashboard */
+.dashboard-block {
+    background: transparent;
+    margin-bottom: 2rem;
+}
+
+/* ===========================
+    SCROLL INTERNO
+=========================== */
+
+/* Scroll SOLO para hosts */
+#hosts-scroll {
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* Scroll SOLO para segmentos */
+#segments-scroll {
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* ===========================
+    TITULOS DE SECCION
+=========================== */
+
+.section-title {
+    color: #e2e8f0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.segment-card {
+    border-left: 4px solid #38bdf8;
+    background: linear-gradient(
+        145deg,
+        rgba(30, 41, 59, 0.95),
+        rgba(15, 23, 42, 0.95)
+    );
+}
+
+/* Evita que nada se monte */
+#segments-scroll,
+#hosts-scroll {
+    position: relative;
+    z-index: 1;
+}

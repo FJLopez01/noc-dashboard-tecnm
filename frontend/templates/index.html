@@ -148,28 +148,62 @@
             </div>
         </div>
 
-        <!-- ===================== GRID DE HOSTS ===================== -->
-        <!-- Aquí se renderizan dinámicamente las tarjetas de hosts -->
-        <div id="grid" class="row g-4 mb-5">
+        <!-- ===================== DASHBOARD CONTENIDO ===================== -->
+        <div class="container-fluid px-4">
 
+            <!-- ===================== HOSTS ===================== -->
+            <div class="dashboard-block mb-4">
 
-            <!-- Loader visible mientras no hay datos -->
-            <div class="col-12 text-center py-5" id="initial-loader">
-                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                    <span class="visually-hidden">Cargando...</span>
+                <h5 class="section-title mb-3">
+                    <i class="fa-solid fa-server me-2"></i>
+                    Hosts individuales
+                </h5>
+
+                <!-- Scroll interno SOLO para hosts -->
+                <div id="hosts-scroll">
+
+                    <!-- GRID DE HOSTS -->
+                    <div id="grid" class="row g-4">
+
+                        <!-- Loader visible mientras no hay datos -->
+                        <div class="col-12 text-center py-5" id="initial-loader">
+                            <div class="spinner-border text-primary"
+                                role="status"
+                                style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+
+                            <p class="mt-3 text-white-50">
+                                Escaneando red y cargando datos...
+                            </p>
+
+                            <small class="text-secondary d-block mt-2">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                Esto puede tomar unos segundos
+                            </small>
+                        </div>
+
+                    </div>
                 </div>
-                <p class="mt-3 text-white-50">Escaneando red y cargando datos...</p>
-                <small class="text-secondary d-block mt-2">
-                    <i class="fa-solid fa-info-circle me-1"></i>
-                    Esto puede tomar unos segundos
-                </small>
+            </div>
+
+            <!-- ===================== SEGMENTOS ===================== -->
+            <div class="dashboard-block">
+
+                <h5 class="section-title mb-3">
+                    <i class="fa-solid fa-network-wired me-2"></i>
+                    Segmentos de red
+                    <span class="badge bg-info bg-opacity-25 ms-2">Vista lógica</span>
+                </h5>
+
+                <!-- Scroll interno SOLO para segmentos -->
+                <div id="segments-scroll">
+                    <div id="groups-container"></div>
+                </div>
+
             </div>
         </div>
 
-        <!-- ===================== GRUPOS VISUALES ===================== -->
-        <div id="groups-container" class="container mb-5">
-            <!-- Se renderizan aquí los grupos de red (mockup visual) -->
-        </div>
 
         <!-- ===================== GRÁFICAS NETFLOW ===================== -->
         <!-- Estructura visual de gráficas.
