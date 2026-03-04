@@ -1,25 +1,35 @@
 # backend/api/status.py
 
-# Blueprint permite agrupar rutas relacionadas
-# jsonify transforma estructuras Python a JSON
 from flask import Blueprint, jsonify
 
-# Almacén en memoria donde se guarda el estado actual de los hosts
 from backend.storage.memory_store import get_all_hosts
+from backend.services.uptime_calculator import calculate_uptime_batch
+from backend.api.auth import require_api_key
 
-# Servicio encargado de calcular el uptime histórico de un host
-from backend.services.uptime_calculator import calculate_uptime
-
-# Esto registra el endpoint bajo /api/status
 bp = Blueprint("status", __name__, url_prefix="/api")
 
-# Devuelve el estado actual de todos los hosts enriquecido con uptime.
+
 @bp.get("/status")
+@require_api_key
 def status():
-    # Obtener estado en tiempo real
+    """
+    Devuelve el estado actual de todos los hosts
+    enriquecido con el uptime calculado en batch.
+
+    ANTES: N queries SQLite (una por host)
+    AHORA: 1 query SQLite para todos los hosts
+    """
     hosts = get_all_hosts()
-    
-    # Calcular uptime por host
-    for h in hosts:
-        h["uptime_percent"] = calculate_uptime(h["ip_address"])
+
+    if not hosts:
+        return jsonify([])
+
+    # ── Batch: una sola query para todos los hosts ─────────────
+    ips            = [h["ip_address"] for h in hosts]
+    uptime_by_ip   = calculate_uptime_batch(ips)
+
+    # ── Enriquecer cada host con su uptime ─────────────────────
+    for host in hosts:
+        host["uptime_percent"] = uptime_by_ip.get(host["ip_address"], 100.0)
+
     return jsonify(hosts)
