@@ -1,52 +1,48 @@
 # backend/api/segments.py
 
-# Blueprint permite agrupar rutas relacionadas (segmentos de red)
-# request se usa para leer datos enviados por el frontend
-# jsonify convierte respuestas Python a JSON
+import ipaddress
 from flask import Blueprint, request, jsonify
 
-# Librería estándar para validar y trabajar con redes IP (CIDR)
-import ipaddress
+from backend.services.segment_loader import load_segments, save_segments, delete_segment
+from backend.api.auth import require_api_key
 
-
-# Importa funciones de negocio para manejar segmentos
-# Estas funciones encapsulan la lógica (archivo, BD, etc.)
-from backend.services.segment_loader import (
-    load_segments,
-    save_segments,
-    delete_segment
-)
-
-
-# Blueprint del módulo de segmentos
-# Todas las rutas quedan bajo /api
 bp = Blueprint("segments", __name__, url_prefix="/api")
+
+MAX_SEGMENTS     = 20
+MAX_NETWORK_SIZE = 1024  # máx ~4 subredes /24
 
 
 @bp.route("/segments", methods=["GET"])
+@require_api_key
 def get_segments():
-    # Carga los segmentos desde el servicio
-    # (pueden venir de archivo o base de datos)
     return jsonify(load_segments())
 
 
-
 @bp.route("/segments", methods=["POST"])
+@require_api_key
 def add_segment():
-    # Datos enviados en formato JSON
-    data = request.json
+    data = request.json or {}
+    segment = data.get("segment", "").strip()
 
-    # Segmento esperado, ejemplo: "192.168.1.0/24"
-    segment = data.get("segment")
+    if not segment:
+        return jsonify({"error": "Segmento requerido"}), 400
 
     try:
-        # Verifica que sea una red IP válida (CIDR)
-        ipaddress.ip_network(segment)
-    except Exception:
-        # Si no es válida, responde con error HTTP 400
+        network = ipaddress.ip_network(segment, strict=False)
+    except ValueError:
         return jsonify({"error": "Segmento inválido"}), 400
 
+    if network.num_addresses > MAX_NETWORK_SIZE:
+        return jsonify({
+            "error": f"Segmento demasiado grande (máx {MAX_NETWORK_SIZE} hosts)"
+        }), 400
+
     segments = load_segments()
+
+    if len(segments) >= MAX_SEGMENTS:
+        return jsonify({
+            "error": f"Límite de {MAX_SEGMENTS} segmentos alcanzado"
+        }), 429
 
     if segment not in segments:
         segments.append(segment)
@@ -56,6 +52,7 @@ def add_segment():
 
 
 @bp.route("/segments/<path:segment>", methods=["DELETE"])
+@require_api_key
 def remove_segment(segment):
     if delete_segment(segment):
         return jsonify({"ok": True})
